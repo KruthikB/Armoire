@@ -1,0 +1,29 @@
+/node_modules
+/.next/
+/out/
+/build
+.DS_Store
+*.pem
+npm-debug.log*
+
+# Environment — never commit real keys
+.env
+.env*.local
+.env.development
+.env.production
+
+# User data — stays on your machine only
+/data/users.json
+/data/wardrobe/
+/data/chats/
+/data/outfits/
+/data/preferences/
+
+# Uploaded clothing images
+/public/uploads/
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+/lib/generated/prisma

@@ -1,0 +1,136 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  createdAt    DateTime @default(now())
+
+  wardrobeItems ClothingItem[]
+  chatSessions  ChatSession[]
+  outfits       Outfit[]
+  preferences   UserPreferences?
+
+  @@map("users")
+}
+
+model ClothingItem {
+  id          String    @id @default(uuid())
+  userId      String
+  name        String
+  imageUrl    String
+  category    String
+  style       String
+  colors      String[]
+  tags        String[]
+  season      String
+  occasion    String[]
+  material    String?
+  pattern     String?
+  brand       String?
+  description String?
+  notes       String?
+  isFavorite  Boolean   @default(false)
+  wearCount   Int       @default(0)
+  lastWorn    DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  outfitItems OutfitItem[]
+
+  @@index([userId])
+  @@map("clothing_items")
+}
+
+model ChatSession {
+  id        String   @id @default(uuid())
+  userId    String
+  title     String   @default("New conversation")
+  context   Json     @default("{}")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages ChatMessage[]
+
+  @@index([userId])
+  @@map("chat_sessions")
+}
+
+model ChatMessage {
+  id        String   @id @default(uuid())
+  sessionId String
+  role      String
+  content   String
+  outfits   Json?
+  createdAt DateTime @default(now())
+
+  session ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@map("chat_messages")
+}
+
+model Outfit {
+  id            String    @id @default(uuid())
+  userId        String
+  name          String
+  description   String
+  occasion      String
+  style         String
+  score         Float     @default(0)
+  wearCount     Int       @default(0)
+  lastWorn      DateTime?
+  isAiGenerated Boolean   @default(false)
+  fingerprint   String
+  createdAt     DateTime  @default(now())
+
+  user  User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items OutfitItem[]
+
+  @@unique([userId, fingerprint])
+  @@index([userId])
+  @@map("outfits")
+}
+
+model OutfitItem {
+  id             String  @id @default(uuid())
+  outfitId       String
+  clothingItemId String
+  role           String
+  itemName       String
+  thumbnailUrl   String?
+  colors         String[]
+  category       String
+
+  outfit       Outfit       @relation(fields: [outfitId],       references: [id], onDelete: Cascade)
+  clothingItem ClothingItem @relation(fields: [clothingItemId], references: [id], onDelete: Cascade)
+
+  @@index([outfitId])
+  @@map("outfit_items")
+}
+
+model UserPreferences {
+  userId              String   @id
+  preferredStyles     String[]
+  dislikedColors      String[]
+  preferredOccasions  String[]
+  skinTone            String?
+  gender              String?
+  city                String?
+  onboardingCompleted Boolean  @default(false)
+  updatedAt           DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_preferences")
+}
