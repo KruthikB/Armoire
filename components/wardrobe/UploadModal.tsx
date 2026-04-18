@@ -4,7 +4,7 @@ import { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import { X, Upload, Loader2, CheckCircle, Plus } from "lucide-react";
 import { useWardrobeStore } from "@/store/useWardrobeStore";
-import { fileToBase64, validateImageFile } from "@/lib/utils";
+import { compressImage, validateImageFile } from "@/lib/utils";
 import { ClothingItemDTO } from "@/types";
 import toast from "react-hot-toast";
 
@@ -57,7 +57,7 @@ export default function UploadModal({ onClose }: UploadModalProps) {
     setStep("uploading");
     try {
       const images = await Promise.all(
-        files.map(async (f) => ({ imageData: await fileToBase64(f) }))
+        files.map(async (f) => ({ imageData: await compressImage(f) }))
       );
 
       setStep("analysing");
